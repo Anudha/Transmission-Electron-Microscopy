@@ -1,0 +1,128 @@
+
+import subprocess
+
+import os
+from subprocess import Popen, PIPE
+
+#subprocess.call('Kirkland\probe.exe', stdin=None, stderr=None, shell=True) # stdin=None lets you answer prompts from command line
+#change stdin to PIPE, then answer prompts from PIPE 
+
+xyzfile='siliconcontrolxyz.txt'
+probefilename = 'Probe300.tif'
+mulsliceresult = xyzfile + 'MulsliceResult.tif'
+tilt = '0 75'
+DP_filename= xyzfile + '100keV'+tilt.replace(' ','_') + '_DP.tif'
+
+with Popen("Kirkland\probe.exe", stdin=PIPE, stdout=PIPE, universal_newlines=True) as p:
+    
+    for line in p.stdout: 
+        print(line)
+        if line.startswith('  or 2 for 2D aberration phase error.'): #This is not the best way to identify the first prompt
+            answer = 0
+            print(answer)
+        elif line.startswith("Name of file"):
+            #filename = get_filename_from_prompt(line) # a regex could be used
+            #answer = yes_or_no_from_subproject.get(filename, 'n') # a dict
+            answer = probefilename
+            print(answer)
+        elif line.startswith("Desired size of output image in pixels Nx,Ny:"):
+            answer = '1024 1024'
+            print(answer)
+        elif line.startswith("Size of output image in Angstroms ax,by:"):
+            answer = '1024 1024'
+            print(answer)
+        elif line.startswith("Probe parameters, V0(kv), Cs3(mm), Cs5(mm), df(Angstroms), apert(mrad):"):
+            #answer = '100 0 0 0 0.3'
+            answer = '100 0 0 0 0.3'  #does a slightly converged, 0.3 mrad convergence angle, probe matter compared to 0 convergence
+            print(answer)
+        elif line.startswith("Type 1 for smooth aperture:"):
+            answer = 0
+            print(answer)
+        elif line.startswith("Probe position x,y in Ang.:"):
+            answer = '604 604'
+            print(answer)
+        elif line.startswith(" by a value in mm. (END to end)"):
+            answer = 'END'
+            print(answer)
+        else:
+            continue # skip it
+        print(answer, file=p.stdin) # provide answer
+        p.stdin.flush()
+
+
+
+
+with Popen("Kirkland\Autoslic.exe", stdin=PIPE, stdout=PIPE, universal_newlines=True) as p:
+    
+    for line in p.stdout: 
+        print(line)
+        if line.startswith("Name of file with input atomic coord. in x,y,z format:"):
+            answer = xyzfile
+            print(answer)
+        elif line.startswith('Replicate unit cell by NCELLX,NCELLY,NCELLZ :'): 
+            answer = '1 1 1'
+            print(answer)
+        elif line.startswith("Name of file to get binary output of multislice result:"):
+            answer = mulsliceresult
+            print(answer)
+        elif line.startswith("Do you want to include partial coherence (y/n) :"):
+            answer = 'n'
+            print(answer)
+        elif line.startswith("Do you want to calculate CBED with TDS (y/n) :"):
+            answer = 'n'
+            print(answer)
+        elif line.startswith("Do you want to calculate diffraction with TDS (y/n) :"):
+            answer = 'n'
+            print(answer)
+        elif line.startswith("Do you want to start from previous result (y/n) :"):
+            answer = 'y'
+            print(answer)
+        elif line.startswith("Name of file to start from:"):
+            answer = probefilename
+            print(answer)
+        elif line.startswith("Crystal tilt x,y in mrad.:"):
+            answer = tilt
+            print(answer)
+        elif line.startswith("Slice thickness (in Angstroms):"):
+            answer = 1
+            print(answer)
+        elif line.startswith(" of selected beams vs. thickness (y/n) :"):
+            answer = 'n'
+            print(answer)
+        elif line.startswith("Do you want to include thermal vibrations (y/n) :"):
+            answer = 'n'
+            print(answer)
+        elif line.startswith("Do you want to output intensity vs. depth cross section (y/n) :"):
+            answer = 'n'
+            print(answer)
+        else:
+            continue # skip it
+        print(answer, file=p.stdin) # provide answer
+        p.stdin.flush()
+
+with Popen("Kirkland\Image.exe", stdin=PIPE, stdout=PIPE, universal_newlines=True) as p:
+    
+    for line in p.stdout: 
+        print(line)
+        if line.startswith("Name of file with input multislice result:"):
+            answer = mulsliceresult
+            print(answer)
+        elif line.startswith('  or 2 for diffraction pattern output:'): 
+            answer = 2
+            print(answer)
+        elif line.startswith("Name of file to get diffraction pattern:"):
+            answer = DP_filename
+            print(answer)
+        elif line.startswith("Do you want to include central beam (y/n) :"):
+            answer = 'y'
+            print(answer)
+        elif line.startswith("Do you want to impose the aperture (y/n) :"):
+            answer = 'n'
+            print(answer)
+        elif line.startswith("  or 2 to do log(1+c*pixel) scale:"):
+            answer = 1  #0 for linear, 1 for log, 2 for log(1+c*pixel), but do not use 2, because then c has to be specified. 
+            print(answer)        
+        else:
+            continue # skip it
+        print(answer, file=p.stdin) # provide answer
+        p.stdin.flush()
