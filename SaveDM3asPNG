@@ -1,0 +1,40 @@
+import os
+
+#Download from:  https://microscopies.med.univ-tours.fr/?page_id=260
+import dm3_lib as dm3
+import matplotlib.pyplot as plt
+#create a list of file names in directory
+
+
+
+filepath=r'C:\Users\ArtsA\Documents\TEM_Automation_Alpesh\Python\DiffSims\SAD_part1\SAD_part1'
+filepath=r'C:\Users\ArtsA\Documents\TEM_Automation_Alpesh\Python\DiffSims\SAD_part2\SAD_part2'
+directory = os.listdir(filepath)
+
+
+
+def saveDM3asPNG(filepath,filename):
+# parse DM3 file
+    temp=filepath+'\\' + filename
+    dm3f = dm3.DM3(temp)
+    # print some useful image information
+    print (dm3f.info)
+    #print ("pixel size = %s %s"%dm3f.pxsize)
+    # display image
+    plt.matshow(dm3f.imagedata, vmin=dm3f.cuts[0], vmax=dm3f.cuts[1], cmap='Greys')
+    #plt.colorbar(shrink=.8)
+    cmap='Greys'
+    plt.matshow(-dm3f.imagedata, vmax=-dm3f.cuts[0], vmin=-dm3f.cuts[1], cmap=cmap)
+    plt.axis('off')
+    newfilename=filename.replace('.dm3','.png').replace('\\','')
+    #print(newfilename)
+    plt.savefig(filepath+'\\'+newfilename+ '.png', bbox_inches='tight')
+    
+
+
+for filename in directory:
+    
+    if ' ' in filename:
+        continue
+    if '.dm3' in filename:
+        saveDM3asPNG(filepath,filename)
