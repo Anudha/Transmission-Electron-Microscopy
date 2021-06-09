@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 
 
 
-filepath=r'C:\Users\ArtsA\Documents\TEM_Automation_Alpesh\Python\DiffSims\SAD_part1\SAD_part1'
-filepath=r'C:\Users\ArtsA\Documents\TEM_Automation_Alpesh\Python\DiffSims\SAD_part2\SAD_part2'
+
+filepath=r'C:\Users\SAD'
 directory = os.listdir(filepath)
 
 
